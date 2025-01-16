@@ -2,7 +2,8 @@ const UserService = require('../services/userService');
 const AuthService = require('../services/authService');
 
 const register = async (req, res) => {  
-    const { name, email, password } = req.body;  
+    const { name, email, password } = req.body;
+    console.log(req.body);
     try {  
         // Check for existing email  
         const existingUser = await UserService.findUserByEmail(email);
@@ -25,9 +26,9 @@ const register = async (req, res) => {
 };
 
 const login = async (req, res) => {  
-    const { email, password } = req.body;  
+    const { name, password } = req.body;  
     try {  
-        const user = await UserService.findUserByEmail(email);  
+        const user = await UserService.findUserByEmail(name);  
 
         if (!user || !(await user.comparePassword(password))) {  
             return res.status(401).json({ error: 'Invalid email or password' });  
