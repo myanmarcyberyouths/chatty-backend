@@ -1,5 +1,5 @@
 const User = require('../models/user');
-const logger = require('pino')
+
 const createUser = async (req , res) => {
     const { name, email, password } = req.body;
     try {

@@ -15,7 +15,6 @@ const register = async (req, res) => {
         
         const token = await AuthService.generateToken(user);
 
-
         res.status(201).json({ user, token });  
     } catch (error) {  
         if (error.code === 11000) {  

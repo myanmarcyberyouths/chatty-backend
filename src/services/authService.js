@@ -1,8 +1,9 @@
+require('dotenv').config();
 const jose = require('jose');  
 
 const sk = process.env.SECRET_KEY;  
-const alg = process.env.ALG;  
 const secret = new TextEncoder().encode(sk)
+
 const AuthService = {  
     async generateToken(user) {  
         const payload = { sub: user._id };   

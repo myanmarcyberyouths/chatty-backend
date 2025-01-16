@@ -1,5 +1,6 @@
 const AuthService = require('../services/authService'); // Make sure the path is correct  
 const logger = require('../utils/logger');
+
 const verifyJwtMiddleware = async (req, res, next) => {  
     const token = req.headers['authorization']?.split(' ')[1]; // Assuming Bearer token format  
     logger.info({token});
