@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chat Application</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+        }
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        input, button, select {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #0070f3;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #0051cc;
+        }
+        #messages {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        #connectionStatus {
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 1rem;
+            }
+            #messages {
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="login">
+            <h1>Chat APPLICATION</h1>
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button id="loginButton">Login</button>
+        </div>
+        <div id="chat" style="display: none;">
+            <div id="messages"></div>
+            <select id="recipient"></select>
+            <input type="text" id="message" placeholder="Type a message">
+            <button id="sendButton">Send</button>
+            <div id="connectionStatus">Disconnected</div>
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const BACKEND_URL = 'http://localhost:3000';
+
+        let socket;
+        let currentUser = '';
+
+        function connectSocket() {
+            socket = io(WEBSOCKET_URL, {
+                transports: ['websocket', 'polling'],
+                timeout: 10000,
+                reconnectionAttempts: 5
+            });
+
+            socket.on('connect', () => {
+                console.log('Connected to server');
+                document.getElementById('connectionStatus').textContent = 'Connected';
+            });
+
+            socket.on('connect_error', (error) => {
+                console.error('Connection error:', error);
+                document.getElementById('connectionStatus').textContent = 'Disconnected';
+                alert('Unable to connect to the chat server. Please check your internet connection and try again.');
+            });
+
+            socket.on('disconnect', (reason) => {
+                console.log('Disconnected:', reason);
+                document.getElementById('connectionStatus').textContent = 'Disconnected';
+            });
+
+            socket.on('private message', ({ message, from, to }) => {
+                displayMessage(message, from, to);
+            });
+
+            socket.on('updatechat', (from, message) => {
+                displayMessage(message, from);
+            });
+
+            socket.on('updateusers', (userList) => {
+                const select = document.getElementById('recipient');
+                select.innerHTML = '';
+                userList.forEach(user => {
+                    if (user !== currentUser) {
+                        const option = document.createElement('option');
+                        option.value = user;
+                        option.textContent = user;
+                        select.appendChild(option);
+                    }
+                });
+            });
+        }
+
+        document.getElementById('loginButton').addEventListener('click', login);
+        document.getElementById('sendButton').addEventListener('click', sendMessage);
+
+        async function login() {
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/v1/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, email, password })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log(data)
+                    localStorage.setItem('token', data.token);
+                    document.getElementById('login').style.display = 'none';
+                    document.getElementById('chat').style.display = 'block';
+                    currentUser = data.user.name;
+                    connectSocket();
+                    socket.emit('adduser', currentUser);
+                } else {
+                    alert('Failed to login. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error during login:', error);
+                alert('An error occurred. Please try again.');
+            }
+        }
+
+        function sendMessage() {
+            const recipient = document.getElementById('recipient').value;
+            const message = document.getElementById('message').value;
+            if (socket && socket.connected && recipient && message) {
+                socket.emit('private message', { recipient, message });
+                document.getElementById('message').value = '';
+            } else {
+                alert('Not connected to the server. Please try again.');
+            }
+        }
+
+        function displayMessage(message, from, to) {
+            const div = document.createElement('div');
+            div.textContent = to 
+                ? `You to ${to}: ${message}`
+                : `${from}: ${message}`;
+            document.getElementById('messages').appendChild(div);
+            document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+        }
+    </script>
+</body>
+</html>
