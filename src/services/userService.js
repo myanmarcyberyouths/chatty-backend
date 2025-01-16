@@ -9,8 +9,8 @@ class UserService {
         return user;  
     }  
 
-    static async findUserByEmail(email) {  
-        return await User.findOne({ email });  
+    static async findUserByEmail(name) {  
+        return await User.findOne({ name });  
     }  
 
     // You can add more user-related methods if needed  

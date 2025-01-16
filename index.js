@@ -15,7 +15,7 @@ const { saveMessage } = require("./src/services/messageService");
 
 const allowedOrigins = [
   "https://staging-dashboard.kalasa.gallery",
-  "http://localhost:5174",
+  "http://localhost:5173",
 ];
 
 app.use(
@@ -146,7 +146,7 @@ const url = process.env.MONGO_URI;
 const start = async () => {
   try {
     await connect(url).catch((err) => console.error(err.message));
-    logger.info("Connected to DB");
+    // logger.info("Connected to DB");
     server.listen(port, () => {
       logger.info(`Server running on port ${port}`);
     });
