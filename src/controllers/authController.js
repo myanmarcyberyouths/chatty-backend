@@ -3,10 +3,9 @@ const AuthService = require('../services/authService');
 
 const register = async (req, res) => {  
     const { name, email, password } = req.body;
-    console.log(req.body);
     try {  
         // Check for existing email  
-        const existingUser = await UserService.findUserByEmail(email);
+        const existingUser = await UserService.findUserByEmail(name);
 
         if (existingUser) {  
             return res.status(400).json({ error: 'Email is already in use.' });  
@@ -18,9 +17,6 @@ const register = async (req, res) => {
 
         res.status(201).json({ user, token });  
     } catch (error) {  
-        if (error.code === 11000) {  
-            return res.status(400).json({ error: 'Email is already in use.' });  
-        }  
         res.status(400).json({ error: error.message });  
     }  
 };

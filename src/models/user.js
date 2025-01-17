@@ -5,19 +5,7 @@ const UserSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  // phone: {
-  //   type: String,
-  //   required: true,
-  //   unique: true,
-  //   validate: {
-  //     validator: function (v) {
-  //       return /^\+?[1-9]\d{1,14}$/.test(v); // Validate phone number format (E.164 standard)
-  //     },
-  //     message: props => `${props.value} is not a valid phone number!`
-  //   }
-  // },
-  // active: { type: Boolean, default: true },
-  // createdAt: { type: Date, default: Date.now },
+  isActive: { type: Boolean, default: true }
 });
 
 // Pre-save middleware to hash the password before saving
@@ -37,6 +25,6 @@ UserSchema.pre("save", async function (next) {
 UserSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
-UserSchema.index({ email: 1 }, { unique: true });
+
 const User = mongoose.model("User", UserSchema);
 module.exports = User;

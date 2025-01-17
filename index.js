@@ -11,11 +11,12 @@ const messageRouter = require("./src/routes/messageRouter");
 const connect = require("./src/db/connect");
 const logger = require("./src/utils/logger");
 require("dotenv").config();
-const { saveMessage } = require("./src/services/messageService");
+const chatService = require('./src/services/chatService');
 
 const allowedOrigins = [
   "https://staging-dashboard.kalasa.gallery",
   "http://localhost:5173",
+  "http://localhost:3000"
 ];
 
 app.use(
@@ -41,6 +42,27 @@ const io = new Server(server, {
   pingTimeout: 60000,
   pingInterval: 25000,
 });
+
+io.on('connection' , (socket) => {
+      // Handle user connection
+    chatService.handleConnection(socket);
+
+    // Listen for chat history request
+    socket.on('load messages', (data) => {
+        chatService.loadMessages(socket, data);
+    });
+
+    // Listen for new chat messages
+    socket.on('chat message', (data) => {
+        chatService.saveMessage(io, data);
+    });
+
+    // Handle user disconnection
+    socket.on('disconnect', () => {
+        chatService.handleDisconnection(socket);
+    });
+})
+
 app.use(express.static(path.join(__dirname, "public"))); // Make sure to have a 'public' folder for static files
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -58,6 +80,7 @@ app.get("/api", (req, res) => {
     message: "Welcome to the Chat App!",
   });
 });
+
 app.post('/test', (req, res) => {
   return res.json({success: true, data: req.body})
 })
@@ -73,72 +96,6 @@ app.use("/api/v1", messageRouter);
 
 const usernames = {};
 
-io.on("connection", (socket) => {
-  logger.info(`A user connected: ${socket.id}`);
-
-  socket.on("adduser", (username) => {
-    logger.info(`Add user: ${username}`);
-    socket.username = username;
-    logger.info(`User: ${socket}`);
-    usernames[username] = socket.id;
-    console.log(Object.keys(usernames));
-    socket.emit(
-      "updatechat",
-      "Chat Bot",
-      `${username}, you have joined the chat`
-    );
-    socket.broadcast.emit(
-      "updatechat",
-      "Chat Bot",
-      `${username} has joined the chat`
-    );
-    io.emit("updateusers", Object.keys(usernames));
-  });
-
-    socket.on('private message', async ({ recipient, message }) => {  
-      const recipientSocket = usernames[recipient];  
-      try {  
-          if (recipientSocket) {  
-              logger.info(`Private message from ${socket.username} to ${recipient}: ${message}`);  
-              io.to(recipientSocket).emit('private message', {  
-                  message,  
-                  from: socket.username,  
-              });  
-  
-              // Save the message to the database  
-              await saveMessage({  
-                  sender: socket.username,  
-                  recipient: recipient,  
-                  content: message,  
-              });  
-  
-              socket.emit('private message', {  
-                  message,  
-                  from: socket.username,  
-                  to: recipient,  
-              });  
-          } else {  
-              socket.emit('updatechat', 'Chat Bot', `User ${recipient} is not online.`);  
-          }  
-      } catch (error) {  
-          console.error('Error handling private message:', error);  
-          socket.emit('updatechat', 'Chat Bot', 'There was an issue sending your message.');  
-      }  
-  });
-
-  socket.on("disconnect", () => {
-    logger.info(`User disconnected: ${socket.username}`);
-    if (socket.username) {
-      delete usernames[socket.username];
-      socket.broadcast.emit(
-        "updatechat",
-        "Chat Bot",
-        `${socket.username} has left the chat`
-      );
-      io.emit("updateusers", Object.keys(usernames));
-    }
-  });
-});
 // Server and database connection
 const port = process.env.PORT || 3000;
 const url = process.env.MONGO_URI;
