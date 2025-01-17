@@ -13,12 +13,14 @@ const logger = require("./src/utils/logger");
 require("dotenv").config();
 const chatService = require('./src/services/chatService');
 
+
 const allowedOrigins = [
   "https://staging-dashboard.kalasa.gallery",
   "http://localhost:5173",
   "http://localhost:3000"
 ];
 
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(
   cors({
     origin: function (origin, callback) {
