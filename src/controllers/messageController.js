@@ -34,9 +34,6 @@ const sendImage = async (req, res) => {
 
       await message.save();
 
-      // const io = req.app.get('socketio');
-      // io.to(recipient).emit('new message', message);
-
       res.status(201).json({ success: true, data: message });
     } catch (error) {
       console.error('Error saving image message:', error);
@@ -44,6 +41,25 @@ const sendImage = async (req, res) => {
     }
   });
 };
+
+const sendSticker = async (req , res) => {
+    const { sender, recipient , content } = req.body;
+    try {
+      const message = new Message({
+        sender,
+        recipient,
+        content,
+        type: 'sticker', 
+      });
+
+      await message.save();
+
+      res.status(201).json({ success: true, data: message });
+    } catch (error) {
+      console.error('Error saving sticker message:', error);
+      res.status(500).json({ success: false, message: 'Error sending sticker.' });
+    }
+}
 
 const messageHistory = async (req, res) => {
   const { sender, recipient, page = 1, limit = 10 } = req.query; // Default to page 1 and limit of 10
@@ -85,4 +101,4 @@ const messageHistory = async (req, res) => {
   }
 };
 
-module.exports = { messageHistory , sendImage}; // Export the function to be used in routes.js file.
+module.exports = { messageHistory , sendImage , sendSticker }; // Export the function to be used in routes.js file.

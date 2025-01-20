@@ -29,11 +29,12 @@ const chatService = {
     },
 
     // Function to save a new message and emit to users
-    saveMessage(io, { sender, recipient, content }) {
+    saveMessage(io, { sender, recipient, content , type }) {
         const newMessage = new Message({
             sender,
             recipient,
-            content
+            content,
+            type
         });
 
         newMessage.save()
