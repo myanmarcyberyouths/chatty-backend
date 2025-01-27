@@ -8,15 +8,14 @@ const path = require("path");
 const authRouter = require("./src/routes/authRouter");
 const userRouter = require("./src/routes/userRouter");
 const messageRouter = require("./src/routes/messageRouter");
+const stickerRouter = require("./src/routes/stickerRouter");
 const connect = require("./src/db/connect");
 const logger = require("./src/utils/logger");
 require("dotenv").config();
 const chatService = require('./src/services/chatService');
 
 const allowedOrigins = [
-  "https://staging-dashboard.kalasa.gallery",
-  "http://localhost:5173",
-  "http://localhost:3000"
+  "http://localhost:3000",
 ];
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -82,9 +81,6 @@ app.get("/api", (req, res) => {
   });
 });
 
-app.post('/test', (req, res) => {
-  return res.json({success: true, data: req.body})
-})
 app.get("/", (req, res) => {
   logger.info("Welcome to the Chat App");
   res.sendFile(path.join(__dirname, "./src/index.html"));
@@ -94,6 +90,7 @@ app.get("/", (req, res) => {
 app.use("/api/v1", userRouter);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1", messageRouter);
+app.use("/api/v1", stickerRouter);
 
 const usernames = {};
 
