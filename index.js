@@ -14,20 +14,10 @@ const logger = require("./src/utils/logger");
 require("dotenv").config();
 const chatService = require('./src/services/chatService');
 
-const allowedOrigins = [
-  "http://localhost:3000",
-];
-
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: "*", 
     methods: ["GET", "POST"],
     credentials: true,
   })
@@ -35,7 +25,7 @@ app.use(
 
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: "*",
     methods: ["GET", "POST"],
     credentials: true,
   },
