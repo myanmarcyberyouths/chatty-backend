@@ -18,7 +18,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(
   cors({
     origin: "*", 
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST" , "DELETE"],
     credentials: true,
   })
 );

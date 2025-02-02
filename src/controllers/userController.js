@@ -69,4 +69,25 @@ const deleteUser = async (req, res) => {
     }
 }
 
-module.exports = { createUser, activeUsers, findUserByPhone, getUser, updateUser, deleteUser };
+const searchUser = async (req , res) => {
+    try {
+    const { query } = req.query; // Get search query from URL params
+
+        if (!query) {
+            return res.status(400).json({ success: false, message: "Search query is required" });
+        }
+
+        const users = await Sticker.find({
+            $or: [
+                { code: { $regex: query, $options: "i" } }, 
+                { group_name: { $regex: query, $options: "i" } }
+            ]
+        })
+        res.json({ success: true , data: users })
+    }  catch (error) {
+        console.error("Search error:", error);
+        res.status(500).json({ success: false, message: "Error searching stickers" });
+    }
+}
+
+module.exports = { createUser, activeUsers, findUserByPhone, getUser, updateUser, deleteUser , searchUser };
