@@ -9,11 +9,9 @@ class UserService {
         return user;  
     }  
 
-    static async findUserByEmail(name) {  
-        return await User.findOne({ name });  
+    static async findUserByEmail(email) {  
+        return await User.findOne({ email });  
     }  
-
-    // You can add more user-related methods if needed  
 }  
 
 module.exports = UserService;  

@@ -82,6 +82,7 @@ const sendSticker = async (req, res) => {
     res.status(500).json({ success: false, message: 'Error sending sticker to group.' });
   }
 };
+
 const getGroups = async (req, res) => {
   const { userId } = req.params;
 

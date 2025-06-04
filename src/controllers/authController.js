@@ -38,4 +38,21 @@ const login = async (req, res) => {
     }  
 };  
 
-module.exports = { register, login }; // Export the functions
+const adminLogin = async (req, res) => {  
+    const { email , password } = req.body;  
+    try {  
+        const user = await UserService.findUserByEmail(email);  
+
+        if (!user || !(await user.comparePassword(password))) {  
+            return res.status(401).json({ error: 'Invalid email or password'});  
+        }  
+ 
+        const token = await AuthService.generateToken(user)
+
+        res.json({ user, token });  
+    } catch (error) {  
+        res.status(500).json({ error: error.message });  
+    }  
+};  
+
+module.exports = { register, login , adminLogin }; // Export the functions
